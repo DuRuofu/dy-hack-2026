@@ -1,13 +1,12 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { DATABASE_CONNECTION } from '../common/db/database.module';
-import { scenes } from '../common/db/schema';
+import { Injectable } from '@nestjs/common';
+import { LocalDbService } from '../common/services/local-db.service';
 
 @Injectable()
 export class ScenesService {
-  constructor(@Inject(DATABASE_CONNECTION) private db: any) {}
+  constructor(private localDb: LocalDbService) {}
 
   async findAll() {
-    const result = await this.db.select().from(scenes);
-    return { scenes: result };
+    const scenes = await this.localDb.findAllScenes();
+    return { scenes };
   }
 }

@@ -1,9 +1,9 @@
 import { Global, Module } from '@nestjs/common';
-import { OssService } from './services/oss.service';
+import { LocalDbService } from './services/local-db.service';
 
 @Global()
 @Module({
-  providers: [OssService],
-  exports: [OssService],
+  providers: [LocalDbService],
+  exports: [LocalDbService],
 })
 export class CommonModule {}

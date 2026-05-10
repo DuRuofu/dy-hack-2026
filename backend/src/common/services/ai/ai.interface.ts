@@ -34,4 +34,5 @@ export abstract class IAiProvider {
   abstract evaluateOutfit(
     clothes: { id: number; name: string; category: string; color: string; style: string }[],
   ): Promise<Evaluation>;
+  abstract transcribeAudio(audioBase64: string): Promise<string>;
 }

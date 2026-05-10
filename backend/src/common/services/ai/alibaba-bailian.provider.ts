@@ -102,4 +102,54 @@ ${clothesList}
     const text = res.choices[0]?.message?.content ?? '{}';
     return JSON.parse(text.replace(/```json\n?|\n?```/g, '').trim());
   }
+
+  async transcribeAudio(audioBase64: string): Promise<string> {
+    const apiKey = this.config.getOrThrow<string>('ALIBABA_BAILIAN_API_KEY');
+    const dataUri = `data:audio/mp3;base64,${audioBase64}`;
+
+    const resp = await fetch(
+      'https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'qwen-audio-turbo',
+          input: {
+            messages: [
+              {
+                role: 'user',
+                content: [
+                  { audio: dataUri },
+                  { text: '请将这段音频完整转写为文字，保留原始语言和口语化表达。只输出转写文字，不要有其他内容。' },
+                ],
+              },
+            ],
+          },
+        }),
+      },
+    );
+
+    if (!resp.ok) {
+      const err = await resp.text();
+      throw new Error(`DashScope ASR failed (${resp.status}): ${err}`);
+    }
+
+    const data = await resp.json();
+    const content = data.output?.choices?.[0]?.message?.content;
+
+    if (!content) return '';
+
+    if (typeof content === 'string') return content;
+    if (Array.isArray(content)) {
+      return content
+        .filter((b: any) => b.text)
+        .map((b: any) => b.text)
+        .join('\n');
+    }
+
+    return String(content);
+  }
 }

@@ -1,60 +1,45 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { DATABASE_CONNECTION } from '../common/db/database.module';
-import { clothes } from '../common/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { Injectable } from '@nestjs/common';
+import { LocalDbService } from '../common/services/local-db.service';
 import { AddClothingDto } from './dto/add-clothing.dto';
 import { UpdateClothingDto } from './dto/update-clothing.dto';
 
 @Injectable()
 export class WardrobeService {
-  constructor(@Inject(DATABASE_CONNECTION) private db: any) {}
+  constructor(private localDb: LocalDbService) {}
 
   async findAll(filters: { category?: string; style?: string; season?: string }) {
-    const conditions = [];
-    if (filters.category) conditions.push(eq(clothes.category, filters.category));
-    if (filters.style) conditions.push(eq(clothes.style, filters.style));
-    if (filters.season) conditions.push(eq(clothes.season, filters.season));
-
-    const query = conditions.length
-      ? this.db.select().from(clothes).where(and(...conditions))
-      : this.db.select().from(clothes);
-
-    const items = await query;
+    const items = await this.localDb.findAllClothes(filters);
     return { items };
   }
 
   async findOne(id: number) {
-    const [item] = await this.db.select().from(clothes).where(eq(clothes.id, id));
+    const item = await this.localDb.findOneCloth(id);
     return { item };
   }
 
   async add(dto: AddClothingDto) {
-    const [row] = await this.db
-      .insert(clothes)
-      .values({
-        name: dto.name,
-        category: dto.category,
-        color: dto.color,
-        style: dto.style,
-        season: dto.season,
-        ossUrl: dto.oss_url,
-        source: dto.source ?? 'upload',
-        taobaoUrl: dto.taobao_url,
-      })
-      .returning({ id: clothes.id });
-
-    return { id: row.id };
+    const result = await this.localDb.insertCloth({
+      name: dto.name,
+      category: dto.category,
+      color: dto.color ?? null,
+      style: dto.style ?? null,
+      season: dto.season ?? null,
+      oss_url: dto.oss_url ?? null,
+      source: dto.source ?? 'upload',
+      taobao_url: dto.taobao_url ?? null,
+    });
+    return { id: result.id };
   }
 
   async update(id: number, dto: UpdateClothingDto) {
-    const updateData: Record<string, any> = {};
-    if (dto.category !== undefined) updateData.category = dto.category;
-    if (dto.color !== undefined) updateData.color = dto.color;
-    if (dto.style !== undefined) updateData.style = dto.style;
-    if (dto.season !== undefined) updateData.season = dto.season;
-    if (dto.name !== undefined) updateData.name = dto.name;
+    const updates: Record<string, any> = {};
+    if (dto.category !== undefined) updates.category = dto.category;
+    if (dto.color !== undefined) updates.color = dto.color;
+    if (dto.style !== undefined) updates.style = dto.style;
+    if (dto.season !== undefined) updates.season = dto.season;
+    if (dto.name !== undefined) updates.name = dto.name;
 
-    await this.db.update(clothes).set(updateData).where(eq(clothes.id, id));
+    await this.localDb.updateCloth(id, updates);
     return { success: true };
   }
 }

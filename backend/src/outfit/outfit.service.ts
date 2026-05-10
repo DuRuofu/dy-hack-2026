@@ -1,40 +1,42 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { DATABASE_CONNECTION } from '../common/db/database.module';
 import { IAiProvider } from '../common/services/ai/ai.interface';
-import { clothes, outfits } from '../common/db/schema';
-import { eq, inArray } from 'drizzle-orm';
+import { LocalDbService } from '../common/services/local-db.service';
 import { RecommendDto } from './dto/recommend.dto';
 import { EvaluateDto } from './dto/evaluate.dto';
 
 @Injectable()
 export class OutfitService {
   constructor(
-    @Inject(DATABASE_CONNECTION) private db: any,
+    private localDb: LocalDbService,
     @Inject(IAiProvider) private ai: IAiProvider,
   ) {}
 
   async recommend(dto: RecommendDto) {
-    const allClothes = await this.db
-      .select({ id: clothes.id, name: clothes.name, category: clothes.category, color: clothes.color, style: clothes.style })
-      .from(clothes);
+    const allClothes = await this.localDb.findAllClothes();
 
     if (allClothes.length === 0) {
       return { outfits: [] };
     }
 
-    const plans = await this.ai.recommendOutfit(allClothes, dto.scene);
+    // Format for AI: only send needed fields
+    const formatted = allClothes.map((c) => ({
+      id: c.id,
+      name: c.name,
+      category: c.category,
+      color: c.color,
+      style: c.style,
+    }));
+
+    const plans = await this.ai.recommendOutfit(formatted, dto.scene);
 
     const enriched = await Promise.all(
       plans.map(async (plan) => {
         const clotheIds = plan.items.map((i) => i.clothe_id);
         const details = clotheIds.length
-          ? await this.db
-              .select({ id: clothes.id, name: clothes.name, category: clothes.category, color: clothes.color, ossUrl: clothes.ossUrl })
-              .from(clothes)
-              .where(inArray(clothes.id, clotheIds))
+          ? await this.localDb.findClothesByIds(clotheIds)
           : [];
 
-        const itemMap = new Map(details.map((d: any) => [d.id, d]));
+        const itemMap = new Map(details.map((d) => [d.id, d]));
 
         return {
           items: plan.items.map((i) => ({
@@ -51,15 +53,20 @@ export class OutfitService {
   }
 
   async evaluate(dto: EvaluateDto) {
-    const selected = await this.db
-      .select({ id: clothes.id, name: clothes.name, category: clothes.category, color: clothes.color, style: clothes.style })
-      .from(clothes)
-      .where(inArray(clothes.id, dto.items));
+    const selected = await this.localDb.findClothesByIds(dto.items);
 
     if (selected.length === 0) {
       return { score: 0, pros: [], cons: ['未找到所选衣物'], suggestion: '请先添加衣物到衣橱' };
     }
 
-    return this.ai.evaluateOutfit(selected);
+    const formatted = selected.map((c) => ({
+      id: c.id,
+      name: c.name,
+      category: c.category,
+      color: c.color,
+      style: c.style,
+    }));
+
+    return this.ai.evaluateOutfit(formatted);
   }
 }
