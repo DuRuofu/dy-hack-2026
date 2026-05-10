@@ -41,7 +41,7 @@ dazi/
 | 层级 | 选型 |
 |------|------|
 | 前端 | Vue 3 + Vite + Tailwind CSS |
-| 后端 | Node.js + Hono (TypeScript) |
+| 后端 | Node.js + NestJS (TypeScript) |
 | AI | 通义千问 (DashScope) 多模态 |
 | 包管理 | pnpm |
 
