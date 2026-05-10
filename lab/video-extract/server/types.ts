@@ -50,6 +50,7 @@ export interface ParseResult {
   taskId: string
   outfitCount: number
   meta?: VideoMeta
+  transcript?: string
   frames: string[]
   analysis: FrameAnalysis[]
   deduplicated: ClothingItem[]

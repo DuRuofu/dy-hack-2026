@@ -45,6 +45,7 @@ interface ParseTask {
       duration: number
       uploader: string
     }
+    transcript?: string
     frames: string[]
     analysis: FrameAnalysis[]
     deduplicated: ClothingItem[]
@@ -208,6 +209,12 @@ function countMatch(expected: number, actual: number) {
             </span>
           </dd>
         </dl>
+      </div>
+
+      <!-- 音频转写 -->
+      <div class="card" v-if="task.result.transcript">
+        <h2>博主口播转写</h2>
+        <div class="transcript-text">{{ task.result.transcript }}</div>
       </div>
 
       <!-- 去重汇总 -->

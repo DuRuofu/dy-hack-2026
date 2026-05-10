@@ -372,3 +372,14 @@ h1 {
   font-weight: 500;
   margin-left: 8px;
 }
+
+.transcript-text {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #333;
+  background: #fafafa;
+  padding: 14px 16px;
+  border-radius: 6px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}

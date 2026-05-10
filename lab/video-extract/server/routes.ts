@@ -3,8 +3,9 @@ import { randomUUID, createHash } from 'crypto'
 import path from 'path'
 import fs from 'fs'
 import OpenAI from 'openai'
-import { parseMeta, downloadVideo, extractFramesByCount } from './services/videoParser.js'
+import { parseMeta, downloadVideo, extractFramesByCount, extractAudio } from './services/videoParser.js'
 import { analyzeFrames } from './services/clothingRecognizer.js'
+import { transcribeAudio } from './services/audioTranscriber.js'
 import type { ParseTask, ProgressStep, ClothingItem, FrameAnalysis, OutfitSet, ParseResult } from './types.js'
 
 const app = new Hono()
@@ -22,6 +23,7 @@ const DEFAULT_STEPS: Omit<ProgressStep, 'status'>[] = [
   { name: 'meta', label: '获取视频信息' },
   { name: 'download', label: '下载视频' },
   { name: 'frames', label: '提取关键帧' },
+  { name: 'transcript', label: '音频转写' },
   { name: 'recognize', label: 'AI 识别衣物' },
 ]
 
@@ -106,6 +108,10 @@ async function runPipeline(url: string, taskId: string, outfitCount: number, fro
     await sleep(200)
     updateStep(task, 'frames', `已提取 ${cached.frames.length} 帧`, 'done')
 
+    updateStep(task, 'transcript', '音频转写中...')
+    await sleep(200)
+    updateStep(task, 'transcript', cached.transcript ? '转写完成' : '无音频，已跳过', 'done')
+
     updateStep(task, 'recognize', `识别中 (0/${cached.frames.length})...`)
     for (let i = 0; i < cached.frames.length; i++) {
       await sleep(100)
@@ -138,11 +144,28 @@ async function runPipeline(url: string, taskId: string, outfitCount: number, fro
   const framePaths = await extractFramesByCount(videoPath, outputDir, outfitCount)
   updateStep(task, 'frames', `已提取 ${framePaths.length} 帧（目标 ${outfitCount} 套）`, 'done')
 
-  // 4. AI 识别衣物
+  // 4. 音频转写（博主口播 → 文字，用于辅助识别）
+  updateStep(task, 'transcript', '提取音频中...')
+  const audioPath = await extractAudio(videoPath, outputDir)
+  let transcript: string | undefined
+  if (audioPath) {
+    updateStep(task, 'transcript', '音频转写中...')
+    try {
+      transcript = await transcribeAudio(audioPath, process.env.DASHSCOPE_API_KEY!)
+      updateStep(task, 'transcript', `转写完成（${transcript.length} 字）`, 'done')
+    } catch (err) {
+      console.error('[transcribe] error:', err)
+      updateStep(task, 'transcript', '转写失败，仅使用图片识别', 'done')
+    }
+  } else {
+    updateStep(task, 'transcript', '无音频轨，已跳过', 'done')
+  }
+
+  // 5. AI 识别衣物（结合音频转写内容）
   updateStep(task, 'recognize', `识别中 (0/${framePaths.length})...`)
   const analysis = await analyzeFrames(framePaths, dashscopeClient, (current, total) => {
     updateStep(task, 'recognize', `识别中 (${current}/${total})...`)
-  })
+  }, transcript)
   const totalRaw = analysis.reduce((sum, a) => sum + a.items.length, 0)
 
   const deduplicated = deduplicateItems(analysis)
@@ -157,6 +180,7 @@ async function runPipeline(url: string, taskId: string, outfitCount: number, fro
     taskId,
     outfitCount,
     meta,
+    transcript,
     frames: framePaths.map(f => path.basename(f)),
     analysis,
     deduplicated,
