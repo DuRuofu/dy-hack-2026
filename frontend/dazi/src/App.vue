@@ -27,10 +27,10 @@
 
 <script setup lang="ts">
 const tabs = [
-  { path: '/', icon: ' ', label: '发现' },
-  { path: '/wardrobe', icon: ' ', label: '衣橱' },
-  { path: '/upload', icon: '+', label: '收录' },
-  { path: '/video', icon: ' ', label: '视频' },
-  { path: '/mix-match', icon: '✨', label: '搭配' },
+  { path: '/', icon: '◇', label: '发现' },
+  { path: '/wardrobe', icon: '□', label: '衣橱' },
+  { path: '/upload', icon: '⊕', label: '收录' },
+  { path: '/video', icon: '◎', label: '方案' },
+  { path: '/mix-match', icon: '✦', label: '搭配' },
 ]
 </script>

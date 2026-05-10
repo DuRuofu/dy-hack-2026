@@ -119,6 +119,13 @@
                 <div class="text-[10px] text-ink-faint tracking-wide uppercase">{{ item.role }}</div>
               </div>
             </div>
+
+            <!-- Save button -->
+            <button @click="onSavePlan(plan._key)"
+              class="mt-3 w-full py-2.5 rounded-xl text-xs font-medium transition-all active:scale-[0.97]"
+              :class="savedPlans.has(plan._key) ? 'bg-sage/10 text-sage' : 'bg-cream text-ink-light hover:bg-charcoal hover:text-white'">
+              {{ savedPlans.has(plan._key) ? '已保存到搭配方案' : '保存到搭配方案' }}
+            </button>
           </div>
         </div>
       </div>
@@ -127,8 +134,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick } from 'vue'
+import { ref, reactive, computed, nextTick } from 'vue'
 import UserAvatar from '../components/UserAvatar.vue'
+import { addPlan } from '../stores/planList'
 
 const scenes = ['通勤上班', '约会出行', '日常休闲', '运动健身', '朋友聚会']
 const chatInput = ref('')
@@ -313,9 +321,32 @@ const sceneOutfits: Record<string, any[]> = {
   ],
 }
 
+const savedPlans = reactive(new Map<string, boolean>())
+
+function onSavePlan(key: string) {
+  if (savedPlans.has(key)) return
+  savedPlans.set(key, true)
+  // Find the plan data
+  for (const plan of outfits.value) {
+    if (plan._key === key) {
+      addPlan({
+        label: plan.label,
+        reason: plan.reason,
+        score: plan.score,
+        source: 'home',
+        items: plan.items.map(i => ({ name: i.name, role: i.role, oss_url: i.oss_url })),
+      })
+      return
+    }
+  }
+}
+
 const outfits = computed(() => {
   const list = sceneOutfits[currentScene.value] || sceneOutfits['日常休闲']
-  return list.slice(0, 2)
+  return list.slice(0, 2).map((p, i) => ({
+    ...p,
+    _key: `${currentScene.value}:${i}`,
+  }))
 })
 
 function scrollToBottom() {
