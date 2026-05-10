@@ -6,6 +6,8 @@ export interface ClothingItem {
     color: string | null;
     style: string | null;
     season: string | null;
+    material: string | null;
+    description: string | null;
     oss_url: string | null;
     source: string;
     taobao_url: string | null;

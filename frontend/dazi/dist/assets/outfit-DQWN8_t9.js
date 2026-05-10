@@ -1,0 +1,1 @@
+import{l as i,i as o}from"./index-DoMuAqrI.js";import{c as n}from"./UserAvatar-Re1-W0jx.js";const c=i("outfit",()=>{const e=o([]),t=o(!1);async function a(f){t.value=!0;try{const{data:s}=await n(f);e.value=s.outfits}finally{t.value=!1}}return{outfits:e,loading:t,fetchRecommend:a}});export{c as u};

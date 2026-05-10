@@ -1,15 +1,12 @@
 <template>
   <div class="min-h-screen bg-cream">
     <div class="bg-charcoal grain relative overflow-hidden">
-      <div class="relative z-10 px-6 pt-5 pb-5">
-        <div class="flex items-center justify-between mb-3">
-          <p class="text-warm-light text-[10px] tracking-[0.3em] uppercase font-medium">Capture</p>
-          <div class="flex items-center gap-2.5">
-            <span class="text-white/50 text-[11px]">Hi, Xiao Ming</span>
-            <div class="w-7 h-7 rounded-full bg-cream/15 flex items-center justify-center text-white text-[11px] font-medium ring-1 ring-white/10">明</div>
-          </div>
-        </div>
+      <div class="relative z-10 px-6 py-5">
+        <p class="text-warm-light text-[11px] tracking-[0.3em] uppercase font-medium mb-1.5">Capture</p>
         <h1 class="font-serif text-2xl text-white font-bold">拍照收录</h1>
+        <div class="absolute right-6 top-1/2 -translate-y-1/2">
+          <UserAvatar />
+        </div>
         <p class="text-white/40 text-xs mt-1.5">AI 自动识别衣物信息</p>
       </div>
       <div class="absolute -right-8 top-2 w-32 h-32 rounded-full border border-white/5"></div>
@@ -32,7 +29,7 @@
         </div>
         <div v-else class="relative">
           <img :src="previewUrl" class="w-full max-h-72 object-contain bg-cream" />
-          <div class="absolute top-3 right-3 bg-black/50 backdrop-blur-sm text-white text-[10px] px-2.5 py-1 rounded-full">
+          <div class="absolute top-3 right-3 bg-black/50 backdrop-blur-sm text-white text-[11px] px-2.5 py-1 rounded-full">
             重新选择
           </div>
         </div>
@@ -52,40 +49,40 @@
       <div v-if="result" class="bg-paper rounded-2xl border border-cream-dark overflow-hidden">
         <div class="px-5 py-3 border-b border-cream-dark/50 flex items-center gap-2">
           <div class="w-1.5 h-4 bg-sage rounded-full"></div>
-          <span class="text-[10px] tracking-[0.15em] uppercase text-ink-faint font-medium">识别结果</span>
+          <span class="text-[11px] tracking-[0.15em] uppercase text-ink-faint font-medium">识别结果</span>
         </div>
         <div class="p-5 space-y-4">
           <div>
-            <label class="text-[10px] text-ink-faint tracking-[0.15em] uppercase mb-1.5 block">名称</label>
+            <label class="text-[11px] text-ink-faint tracking-[0.15em] uppercase mb-1.5 block">名称</label>
             <input v-model="result.name" placeholder="如：白色亚麻衬衫"
               class="w-full px-4 py-3 rounded-xl bg-cream border-0 text-sm text-ink placeholder:text-ink-faint/50 focus:outline-none focus:ring-2 focus:ring-coral/30" />
           </div>
           <div>
-            <label class="text-[10px] text-ink-faint tracking-[0.15em] uppercase mb-1.5 block">品类</label>
+            <label class="text-[11px] text-ink-faint tracking-[0.15em] uppercase mb-1.5 block">品类</label>
             <div class="flex flex-wrap gap-2">
               <button v-for="c in categories" :key="c.value"
                 @click="result.category = c.value"
-                class="px-3 py-1.5 rounded-full text-[11px] font-medium transition-all"
+                class="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
                 :class="result.category === c.value ? 'bg-charcoal text-white' : 'bg-cream text-ink-light'"
               >{{ c.label }}</button>
             </div>
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="text-[10px] text-ink-faint tracking-[0.15em] uppercase mb-1.5 block">颜色</label>
+              <label class="text-[11px] text-ink-faint tracking-[0.15em] uppercase mb-1.5 block">颜色</label>
               <select v-model="result.color" class="w-full px-4 py-3 rounded-xl bg-cream border-0 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-coral/30">
                 <option v-for="c in colors" :key="c.value" :value="c.value">{{ c.label }}</option>
               </select>
             </div>
             <div>
-              <label class="text-[10px] text-ink-faint tracking-[0.15em] uppercase mb-1.5 block">风格</label>
+              <label class="text-[11px] text-ink-faint tracking-[0.15em] uppercase mb-1.5 block">风格</label>
               <select v-model="result.style" class="w-full px-4 py-3 rounded-xl bg-cream border-0 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-coral/30">
                 <option v-for="s in styles" :key="s.value" :value="s.value">{{ s.label }}</option>
               </select>
             </div>
           </div>
           <div>
-            <label class="text-[10px] text-ink-faint tracking-[0.15em] uppercase mb-1.5 block">季节</label>
+            <label class="text-[11px] text-ink-faint tracking-[0.15em] uppercase mb-1.5 block">季节</label>
             <select v-model="result.season" class="w-full px-4 py-3 rounded-xl bg-cream border-0 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-coral/30">
               <option v-for="s in seasons" :key="s.value" :value="s.value">{{ s.label }}</option>
             </select>
@@ -111,6 +108,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { recognizeImage, addClothing } from '../api'
+import UserAvatar from '../components/UserAvatar.vue'
 
 const file = ref<File | null>(null)
 const previewUrl = ref('')

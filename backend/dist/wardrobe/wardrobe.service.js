@@ -31,6 +31,8 @@ let WardrobeService = class WardrobeService {
             color: dto.color ?? null,
             style: dto.style ?? null,
             season: dto.season ?? null,
+            material: dto.material ?? null,
+            description: dto.description ?? null,
             oss_url: dto.oss_url ?? null,
             source: dto.source ?? 'upload',
             taobao_url: dto.taobao_url ?? null,
@@ -49,6 +51,10 @@ let WardrobeService = class WardrobeService {
             updates.season = dto.season;
         if (dto.name !== undefined)
             updates.name = dto.name;
+        if (dto.material !== undefined)
+            updates.material = dto.material;
+        if (dto.description !== undefined)
+            updates.description = dto.description;
         await this.localDb.updateCloth(id, updates);
         return { success: true };
     }

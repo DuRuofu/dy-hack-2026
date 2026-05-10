@@ -4,4 +4,6 @@ export declare class UpdateClothingDto {
     color?: string;
     style?: string;
     season?: string;
+    material?: string;
+    description?: string;
 }

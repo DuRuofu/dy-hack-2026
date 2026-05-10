@@ -6,5 +6,7 @@ export declare class SaveVideoItemsDto {
         style?: string;
         season?: string;
         name?: string;
+        material?: string;
+        description?: string;
     }[];
 }

@@ -2,16 +2,12 @@
   <div class="min-h-screen bg-cream">
     <!-- Header -->
     <div class="bg-charcoal grain relative overflow-hidden">
-      <div class="relative z-10 px-6 pt-5 pb-5">
-        <div class="flex items-center justify-between mb-3">
-          <p class="text-warm-light text-[10px] tracking-[0.3em] uppercase font-medium">My Closet</p>
-          <div class="flex items-center gap-2.5">
-            <span class="text-white/50 text-[11px]">Hi, Xiao Ming</span>
-            <div class="w-7 h-7 rounded-full bg-cream/15 flex items-center justify-center text-white text-[11px] font-medium ring-1 ring-white/10">明</div>
-          </div>
+      <div class="relative z-10 px-6 py-5">
+        <p class="text-warm-light text-[10px] tracking-[0.3em] uppercase font-medium mb-1.5">My Closet</p>
+        <h1 class="font-serif text-2xl text-white font-bold">我的衣橱<span class="text-white/40 text-base font-normal ml-2">{{ loading ? '...' : `${items.length} 件` }}</span></h1>
+        <div class="absolute right-6 top-1/2 -translate-y-1/2">
+          <UserAvatar />
         </div>
-        <h1 class="font-serif text-2xl text-white font-bold">我的衣橱</h1>
-        <p class="text-white/40 text-xs mt-1.5">{{ loading ? '...' : `${items.length} 件衣物` }}</p>
       </div>
       <div class="absolute -right-8 top-2 w-32 h-32 rounded-full border border-white/5"></div>
       <div class="absolute -right-4 top-8 w-20 h-20 rounded-full border border-white/5"></div>
@@ -22,14 +18,14 @@
       <div class="flex gap-2 overflow-x-auto pb-0.5">
         <button
           @click="filterCategory = ''"
-          class="flex-shrink-0 px-4 py-1.5 rounded-full text-[11px] font-medium transition-all duration-300 tracking-wide"
+          class="flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-300 tracking-wide"
           :class="filterCategory === '' ? 'bg-charcoal text-white' : 'bg-paper text-ink-light border border-cream-dark'"
         >全部</button>
         <button
           v-for="c in categories"
           :key="c.value"
           @click="filterCategory = c.value"
-          class="flex-shrink-0 px-4 py-1.5 rounded-full text-[11px] font-medium transition-all duration-300 tracking-wide"
+          class="flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-300 tracking-wide"
           :class="filterCategory === c.value ? 'bg-charcoal text-white' : 'bg-paper text-ink-light border border-cream-dark'"
         >{{ c.label }}</button>
       </div>
@@ -48,15 +44,15 @@
             <img
               v-if="item.oss_url || item.ossUrl"
               :src="item.oss_url || item.ossUrl"
-              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              class="w-full h-full object-cover scale-110 transition-transform duration-500 group-hover:scale-110"
             />
             <div v-else class="w-full h-full bg-cream-dark flex items-center justify-center">
               <span class="text-xl opacity-20"> </span>
             </div>
           </div>
           <div class="p-1.5">
-            <div class="text-[10px] font-medium text-ink truncate">{{ item.name }}</div>
-            <div class="text-[8px] text-ink-faint tracking-wider uppercase truncate">
+            <div class="text-[11px] font-medium text-ink truncate">{{ item.name }}</div>
+            <div class="text-[10px] text-ink-faint tracking-wider uppercase truncate">
               {{ labelMap.category[item.category] || item.category }}
             </div>
           </div>
@@ -79,7 +75,7 @@
 
             <div class="space-y-4">
               <div>
-                <label class="text-[10px] text-ink-faint tracking-[0.15em] uppercase mb-1.5 block">名称</label>
+                <label class="text-[11px] text-ink-faint tracking-[0.15em] uppercase mb-1.5 block">名称</label>
                 <input v-model="editing.name"
                   class="w-full px-4 py-3 rounded-xl bg-cream border-0 text-sm text-ink placeholder:text-ink-faint/50 focus:outline-none focus:ring-2 focus:ring-coral/30" />
               </div>
@@ -89,7 +85,7 @@
                 <div class="flex flex-wrap gap-2">
                   <button v-for="c in categories" :key="c.value"
                     @click="editing.category = c.value"
-                    class="px-3 py-1.5 rounded-full text-[11px] font-medium transition-all"
+                    class="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
                     :class="editing.category === c.value ? 'bg-charcoal text-white' : 'bg-cream text-ink-light'"
                   >{{ c.label }}</button>
                 </div>
@@ -100,7 +96,7 @@
                 <div class="flex flex-wrap gap-2">
                   <button v-for="c in colors" :key="c.value"
                     @click="editing.color = c.value"
-                    class="px-3 py-1.5 rounded-full text-[11px] font-medium transition-all"
+                    class="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
                     :class="editing.color === c.value ? 'bg-charcoal text-white' : 'bg-cream text-ink-light'"
                   >{{ c.label }}</button>
                 </div>
@@ -140,6 +136,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useWardrobeStore } from '../stores/wardrobe'
 import { storeToRefs } from 'pinia'
+import UserAvatar from '../components/UserAvatar.vue'
 import { updateClothing } from '../api'
 
 const store = useWardrobeStore()

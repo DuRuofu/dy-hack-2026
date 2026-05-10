@@ -149,6 +149,8 @@ export class VideoService {
         color: item.color ?? null,
         style: item.style ?? null,
         season: item.season ?? null,
+        material: item.material ?? null,
+        description: item.description ?? null,
         oss_url: imageUrl,
         source: 'video',
         taobao_url: null,

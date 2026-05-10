@@ -1,15 +1,12 @@
 <template>
   <div class="min-h-screen bg-cream">
     <div class="bg-charcoal grain relative overflow-hidden">
-      <div class="relative z-10 px-6 pt-5 pb-5">
-        <div class="flex items-center justify-between mb-3">
-          <p class="text-warm-light text-[10px] tracking-[0.3em] uppercase font-medium">Mix & Match</p>
-          <div class="flex items-center gap-2.5">
-            <span class="text-white/50 text-[11px]">Hi, Xiao Ming</span>
-            <div class="w-7 h-7 rounded-full bg-cream/15 flex items-center justify-center text-white text-[11px] font-medium ring-1 ring-white/10">明</div>
-          </div>
-        </div>
+      <div class="relative z-10 px-6 py-5">
+        <p class="text-warm-light text-[10px] tracking-[0.3em] uppercase font-medium mb-1.5">Mix & Match</p>
         <h1 class="font-serif text-2xl text-white font-bold">自由搭配</h1>
+        <div class="absolute right-6 top-1/2 -translate-y-1/2">
+          <UserAvatar />
+        </div>
         <p class="text-white/40 text-xs mt-1.5">选出衣物，让 AI 给你打分</p>
       </div>
       <div class="absolute -right-8 top-2 w-32 h-32 rounded-full border border-white/5"></div>
@@ -24,7 +21,7 @@
             <span class="font-serif text-sm font-bold text-coral">01</span>
             <span class="text-xs font-medium text-ink">选择衣物</span>
           </div>
-          <button @click="loadWardrobe" class="text-[10px] text-ink-faint tracking-wider uppercase hover:text-ink transition-colors">
+          <button @click="loadWardrobe" class="text-[11px] text-ink-faint tracking-wider uppercase hover:text-ink transition-colors">
             {{ loadingWardrobe ? '加载中' : '刷新' }}
           </button>
         </div>
@@ -35,7 +32,7 @@
             class="relative aspect-square rounded-lg overflow-hidden cursor-pointer transition-all duration-200"
             :class="selectedIds.includes(item.id) ? 'ring-2 ring-coral shadow-md scale-[0.97]' : 'ring-1 ring-cream-dark'"
           >
-            <img v-if="item.oss_url || item.ossUrl" :src="item.oss_url || item.ossUrl" class="w-full h-full object-cover" />
+            <img v-if="item.oss_url || item.ossUrl" :src="item.oss_url || item.ossUrl" class="w-full h-full object-cover scale-110" />
             <div v-else class="w-full h-full bg-cream-dark flex items-center justify-center text-ink-faint/30 text-lg"> </div>
             <!-- Selection indicator -->
             <div v-if="selectedIds.includes(item.id)"
@@ -81,7 +78,7 @@
       <!-- Result -->
       <div v-if="evaluation" class="bg-paper rounded-2xl border border-cream-dark overflow-hidden">
         <div class="px-5 py-3 border-b border-cream-dark/50">
-          <span class="text-[10px] tracking-[0.15em] uppercase text-ink-faint font-medium">AI 评价</span>
+          <span class="text-[11px] tracking-[0.15em] uppercase text-ink-faint font-medium">AI 评价</span>
         </div>
         <div class="p-5">
           <!-- Score -->
@@ -163,6 +160,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { getWardrobe, evaluateOutfit } from '../api'
+import UserAvatar from '../components/UserAvatar.vue'
 
 const wardrobeItems = ref<any[]>([])
 const loadingWardrobe = ref(false)
