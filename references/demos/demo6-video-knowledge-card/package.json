@@ -1,0 +1,29 @@
+{
+  "name": "demo6-video-knowledge-card",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:server": "tsx watch server/index.ts",
+    "dev:client": "vite client --port 5176",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.12.0",
+    "dotenv": "^16.5.0",
+    "execa": "^9.0.0",
+    "fluent-ffmpeg": "^2.1.3",
+    "hono": "^4.4.0",
+    "@anthropic-ai/sdk": "^0.39.0"
+  },
+  "devDependencies": {
+    "@types/fluent-ffmpeg": "^2.1.24",
+    "@types/node": "^20.0.0",
+    "@vitejs/plugin-vue": "^5.2.0",
+    "tsx": "^4.10.0",
+    "typescript": "^5.4.0",
+    "vite": "^5.2.0",
+    "vue": "^3.4.0"
+  }
+}

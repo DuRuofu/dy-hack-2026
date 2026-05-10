@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>花卉社区 App</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; background: #e5e5e5; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px 0; }
+
+/* ===== 手机外壳 ===== */
+.phone { width: 375px; height: 812px; background: #FAF7F2; border-radius: 40px; overflow: hidden; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.15); flex-shrink: 0; }
+.phones { display: flex; gap: 40px; justify-content: center; flex-wrap: wrap; }
+
+/* ===== 状态栏 ===== */
+.status-bar { height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+.status-time { font-size: 14px; font-weight: 600; color: #1A1A1A; }
+.status-icons { display: flex; gap: 6px; align-items: center; }
+.status-icons span { display: inline-block; background: #1A1A1A; border-radius: 2px; }
+
+/* ===== 通用 Tab 栏 ===== */
+.tab-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 72px; background: #FFFFFF; display: flex; align-items: center; justify-content: space-around; padding: 8px 0 20px 0; border-top: 1px solid #f0f0f0; }
+.tab-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+.tab-icon { font-size: 20px; height: 32px; width: 32px; display: flex; align-items: center; justify-content: center; }
+.tab-label { font-size: 10px; color: #9CA3AF; }
+.tab-item.active .tab-icon { filter: none; }
+.tab-item.active .tab-label { color: #72D350; font-weight: 600; }
+.tab-item:not(.active) .tab-icon { filter: grayscale(0.5); opacity: 0.6; }
+
+/* ===== 黄色横幅 ===== */
+.ribbon { height: 40px; background: #FFF000; display: flex; align-items: center; justify-content: center; }
+.ribbon-text { font-size: 13px; font-weight: 600; color: #1A1A1A; }
+
+/* ===== 页面内容区 ===== */
+.page { display: none; height: 100%; flex-direction: column; position: relative; }
+.page.active { display: flex; }
+.page-content { flex: 1; overflow-y: auto; padding-bottom: 112px; -webkit-overflow-scrolling: touch; }
+.page-content::-webkit-scrollbar { display: none; }
+
+/* ===================== 首页 ===================== */
+
+/* 搜索栏 */
+.search-header { display: flex; align-items: center; gap: 12px; padding: 0 16px; height: 52px; }
+.search-bar { flex: 1; height: 36px; background: #E8E5E0; border-radius: 18px; display: flex; align-items: center; padding: 0 16px; gap: 6px; }
+.search-bar .icon { font-size: 14px; color: #4B5563; }
+.search-bar .text { font-size: 13px; color: #9CA3AF; }
+.location-badge { background: #72D350; border-radius: 9999px; padding: 6px 12px; display: flex; align-items: center; gap: 4px; }
+.location-badge span { font-size: 11px; color: #fff; font-weight: 500; }
+
+/* 轮播 */
+.carousel-section { padding: 8px 16px; }
+.carousel { position: relative; height: 130px; border-radius: 12px; overflow: hidden; background: #72D350; }
+.carousel-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 0 20px 20px; display: flex; flex-direction: column; gap: 6px; }
+.carousel-tag { background: #FFF000; border-radius: 9999px; padding: 4px 12px; display: inline-flex; align-self: flex-start; }
+.carousel-tag span { font-size: 11px; font-weight: 600; color: #1A1A1A; }
+.carousel-title { font-size: 20px; font-weight: 700; color: #fff; }
+.carousel-sub { font-size: 12px; color: rgba(255,255,255,0.9); }
+.carousel-dots { display: flex; justify-content: center; gap: 6px; margin-top: 8px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; }
+.dot.active { background: #72D350; }
+.dot:not(.active) { background: #D1D5DB; }
+
+/* 快捷入口 */
+.quick-actions { display: flex; justify-content: space-between; padding: 6px 16px; }
+.qa-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.qa-circle { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.qa-label { font-size: 10px; color: #1A1A1A; }
+
+/* 区域标题 */
+.section-title { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; }
+.section-title h2 { font-size: 18px; font-weight: 700; color: #1A1A1A; font-family: 'Funnel Sans', sans-serif; }
+.section-title a { font-size: 12px; color: #72D350; text-decoration: none; }
+
+/* 帖子卡片 */
+.feed { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; }
+.feed-card { background: #fff; border-radius: 12px; overflow: hidden; }
+.feed-card-img { height: 100px; }
+.feed-card-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.feed-card-title { font-size: 15px; font-weight: 600; color: #1A1A1A; font-family: 'Funnel Sans', sans-serif; }
+.feed-card-meta { display: flex; align-items: center; justify-content: space-between; }
+.feed-card-author { display: flex; align-items: center; gap: 8px; }
+.feed-card-avatar { width: 20px; height: 20px; border-radius: 50%; }
+.feed-card-name { font-size: 11px; color: #9CA3AF; }
+.feed-card-stats { display: flex; gap: 12px; }
+.feed-card-stats span { font-size: 11px; color: #9CA3AF; }
+
+/* 首页帖子2 - 问答式 */
+.home-post { background: #fff; border-radius: 12px; overflow: hidden; }
+.home-post-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px 0; }
+.home-post-user { display: flex; align-items: center; gap: 10px; }
+.home-post-avatar { width: 28px; height: 28px; border-radius: 50%; }
+.home-post-info { display: flex; flex-direction: column; gap: 2px; }
+.home-post-name { font-size: 12px; font-weight: 500; color: #1A1A1A; }
+.home-post-time { font-size: 10px; color: #9CA3AF; }
+.home-post-tag { background: rgba(114,211,80,0.15); border-radius: 9999px; padding: 3px 10px; }
+.home-post-tag span { font-size: 10px; font-weight: 600; color: #72D350; }
+.home-post-body { padding: 8px 14px; }
+.home-post-body p { font-size: 13px; color: #1A1A1A; line-height: 1.5; }
+.home-post-actions { display: flex; gap: 20px; padding: 8px 14px; }
+.home-post-actions span { font-size: 11px; color: #4B5563; }
+
+/* ===================== 社区页 ===================== */
+
+/* 社区标题栏 */
+.comm-header { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 52px; }
+.comm-title { font-size: 20px; font-weight: 700; color: #1A1A1A; font-family: 'Funnel Sans', sans-serif; }
+.comm-post-btn { background: #72D350; border-radius: 9999px; padding: 8px 20px; display: flex; align-items: center; }
+.comm-post-btn span { font-size: 13px; font-weight: 600; color: #fff; }
+
+/* 分类 Tabs */
+.topic-tabs { display: flex; gap: 10px; padding: 8px 16px; }
+.topic-tab { border-radius: 9999px; padding: 6px 16px; font-size: 13px; cursor: pointer; transition: all 0.2s; border: none; }
+.topic-tab.active { background: #72D350; color: #fff; font-weight: 600; }
+.topic-tab:not(.active) { background: #E8E5E0; color: #4B5563; font-weight: 400; }
+
+/* 社区帖子 */
+.comm-feed { padding: 4px 16px; display: flex; flex-direction: column; gap: 12px; }
+.comm-post { background: #fff; border-radius: 12px; overflow: hidden; }
+.comm-post-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px 0; }
+.comm-post-user { display: flex; align-items: center; gap: 10px; }
+.comm-post-avatar { width: 32px; height: 32px; border-radius: 50%; }
+.comm-post-info { display: flex; flex-direction: column; gap: 2px; }
+.comm-post-name { font-size: 13px; font-weight: 500; color: #1A1A1A; }
+.comm-post-time { font-size: 11px; color: #9CA3AF; }
+.comm-follow { background: #E8E5E0; border-radius: 9999px; padding: 4px 14px; cursor: pointer; }
+.comm-follow span { font-size: 11px; color: #72D350; }
+.comm-tag { border-radius: 9999px; padding: 4px 12px; }
+.comm-tag span { font-size: 11px; font-weight: 600; color: #72D350; }
+.comm-tag-bg { background: rgba(114,211,80,0.15); }
+.comm-post-body { padding: 10px 14px; }
+.comm-post-body p { font-size: 14px; color: #1A1A1A; line-height: 1.6; }
+.comm-post-images { display: flex; gap: 6px; padding: 0 14px 8px; }
+.comm-post-img { width: 104px; height: 104px; border-radius: 8px; }
+.comm-post-actions { display: flex; gap: 24px; padding: 10px 14px; }
+.comm-post-actions span { font-size: 12px; color: #4B5563; cursor: pointer; }
+
+/* ===================== 响应式 ===================== */
+@media (max-width: 800px) {
+  .phones { flex-direction: column; align-items: center; }
+}
+</style>
+</head>
+<body>
+
+<div class="phones">
+
+  <!-- ==================== 首页 ==================== -->
+  <div class="phone">
+    <div class="page active" id="homePage">
+      <!-- 状态栏 -->
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <span style="width:16px;height:10px"></span>
+          <span style="width:14px;height:10px"></span>
+          <span style="width:22px;height:10px;border-radius:3px"></span>
+        </div>
+      </div>
+
+      <div class="page-content">
+        <!-- 搜索栏 -->
+        <div class="search-header">
+          <div class="search-bar">
+            <span class="icon">&#128269;</span>
+            <span class="text">搜索花卉、文章、花友...</span>
+          </div>
+          <div class="location-badge">
+            <span>  &#128205; 定位</span>
+          </div>
+        </div>
+
+        <!-- 轮播 -->
+        <div class="carousel-section">
+          <div class="carousel">
+            <div class="carousel-overlay">
+              <div class="carousel-tag"><span>限时活动</span></div>
+              <div class="carousel-title">春日花卉摄影大赛</div>
+              <div class="carousel-sub">上传你的花园美照，赢取精美花盆套装</div>
+            </div>
+          </div>
+          <div class="carousel-dots">
+            <div class="dot active"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+        </div>
+
+        <!-- 快捷入口 -->
+        <div class="quick-actions">
+          <div class="qa-item">
+            <div class="qa-circle" style="background:#72D350">&#128218;</div>
+            <span class="qa-label">种植指南</span>
+          </div>
+          <div class="qa-item">
+            <div class="qa-circle" style="background:#FFF000">&#127807;</div>
+            <span class="qa-label">花市</span>
+          </div>
+          <div class="qa-item">
+            <div class="qa-circle" style="background:#72D350">&#128197;</div>
+            <span class="qa-label">养护日历</span>
+          </div>
+          <div class="qa-item">
+            <div class="qa-circle" style="background:#FFF000">&#127793;</div>
+            <span class="qa-label">识花</span>
+          </div>
+        </div>
+
+        <!-- 热门推荐 -->
+        <div class="section-title">
+          <h2>热门推荐</h2>
+          <a href="#">查看全部 &gt;</a>
+        </div>
+
+        <!-- 帖子卡片 1 -->
+        <div class="feed">
+          <div class="feed-card">
+            <div class="feed-card-img" style="background:rgba(114,211,80,0.3)"></div>
+            <div class="feed-card-body">
+              <div class="feed-card-title">阳台月季爆盆秘诀，新手也能轻松上手！</div>
+              <div class="feed-card-meta">
+                <div class="feed-card-author">
+                  <div class="feed-card-avatar" style="background:#72D350"></div>
+                  <span class="feed-card-name">园艺小达人</span>
+                </div>
+                <div class="feed-card-stats">
+                  <span>&#9829; 1.2k</span>
+                  <span>&#128172; 89</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 帖子卡片 2 -->
+          <div class="home-post">
+            <div class="home-post-header">
+              <div class="home-post-user">
+                <div class="home-post-avatar" style="background:#FFF000"></div>
+                <div class="home-post-info">
+                  <span class="home-post-name">花草新手</span>
+                  <span class="home-post-time">2 小时前</span>
+                </div>
+              </div>
+              <div class="home-post-tag comm-tag-bg"><span>求教</span></div>
+            </div>
+            <div class="home-post-body">
+              <p>绿萝叶子发黄是什么原因？求大神指点！</p>
+            </div>
+            <div class="home-post-actions">
+              <span>&#9829; 45</span>
+              <span>&#128172; 23</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 黄色横幅 -->
+        <div class="ribbon" style="margin-top:16px">
+          <span class="ribbon-text">&#10024; 每日精选花语 &#10024;</span>
+        </div>
+      </div>
+
+      <!-- 底部 Tab -->
+      <div class="tab-bar">
+        <div class="tab-item active">
+          <span class="tab-icon">&#127968;</span>
+          <span class="tab-label">首页</span>
+        </div>
+        <div class="tab-item" onclick="switchPhoneTab(this, 'community')">
+          <span class="tab-icon">&#128172;</span>
+          <span class="tab-label">社区</span>
+        </div>
+        <div class="tab-item">
+          <span class="tab-icon">&#127807;</span>
+          <span class="tab-label">花园</span>
+        </div>
+        <div class="tab-item">
+          <span class="tab-icon">&#128100;</span>
+          <span class="tab-label">我的</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 社区页 ==================== -->
+  <div class="phone">
+    <div class="page active" id="commPage">
+      <!-- 状态栏 -->
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <span style="width:16px;height:10px"></span>
+          <span style="width:14px;height:10px"></span>
+          <span style="width:22px;height:10px;border-radius:3px"></span>
+        </div>
+      </div>
+
+      <div class="page-content">
+        <!-- 标题栏 -->
+        <div class="comm-header">
+          <span class="comm-title">花友社区</span>
+          <div class="comm-post-btn"><span>+ 发帖</span></div>
+        </div>
+
+        <!-- 分类 Tabs -->
+        <div class="topic-tabs">
+          <button class="topic-tab active">全部</button>
+          <button class="topic-tab" onclick="switchTab(this)">热门</button>
+          <button class="topic-tab" onclick="switchTab(this)">问答</button>
+          <button class="topic-tab" onclick="switchTab(this)">晒花</button>
+        </div>
+
+        <!-- 帖子 1 -->
+        <div class="comm-feed">
+          <div class="comm-post">
+            <div class="comm-post-header">
+              <div class="comm-post-user">
+                <div class="comm-post-avatar" style="background:#72D350"></div>
+                <div class="comm-post-info">
+                  <span class="comm-post-name">阳光花园</span>
+                  <span class="comm-post-time">3 小时前</span>
+                </div>
+              </div>
+              <div class="comm-follow"><span>+ 关注</span></div>
+            </div>
+            <div class="comm-post-body">
+              <p>第一次种向日葵就成功了！从播种到开花只用了60天，分享一下我的种植日记&#127803;</p>
+            </div>
+            <div class="comm-post-images">
+              <div class="comm-post-img" style="background:rgba(114,211,80,0.35)"></div>
+              <div class="comm-post-img" style="background:rgba(255,240,0,0.35)"></div>
+              <div class="comm-post-img" style="background:rgba(114,211,80,0.2)"></div>
+            </div>
+            <div class="comm-post-actions">
+              <span>&#9829; 328</span>
+              <span>&#128172; 56</span>
+              <span>&#8599; 分享</span>
+            </div>
+          </div>
+
+          <!-- 帖子 2 -->
+          <div class="comm-post">
+            <div class="comm-post-header">
+              <div class="comm-post-user">
+                <div class="comm-post-avatar" style="background:#FFF000"></div>
+                <div class="comm-post-info">
+                  <span class="comm-post-name">花草新手</span>
+                  <span class="comm-post-time">5 小时前</span>
+                </div>
+              </div>
+              <div class="comm-tag comm-tag-bg"><span>求教</span></div>
+            </div>
+            <div class="comm-post-body">
+              <p>我的绿萝叶子发黄是什么原因？已经放在室内散射光处了，一周浇一次水，求大神指点！</p>
+            </div>
+            <div class="comm-post-actions">
+              <span>&#9829; 45</span>
+              <span>&#128172; 23</span>
+              <span>&#8599; 分享</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 黄色横幅 -->
+        <div class="ribbon" style="margin-top:12px">
+          <span class="ribbon-text">&#127800; 今日话题：你最爱的春季花卉是什么？</span>
+        </div>
+      </div>
+
+      <!-- 底部 Tab -->
+      <div class="tab-bar">
+        <div class="tab-item">
+          <span class="tab-icon">&#127968;</span>
+          <span class="tab-label">首页</span>
+        </div>
+        <div class="tab-item active">
+          <span class="tab-icon">&#128172;</span>
+          <span class="tab-label">社区</span>
+        </div>
+        <div class="tab-item">
+          <span class="tab-icon">&#127807;</span>
+          <span class="tab-label">花园</span>
+        </div>
+        <div class="tab-item">
+          <span class="tab-icon">&#128100;</span>
+          <span class="tab-label">我的</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function switchTab(el) {
+  const tabs = el.parentElement.querySelectorAll('.topic-tab');
+  tabs.forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>

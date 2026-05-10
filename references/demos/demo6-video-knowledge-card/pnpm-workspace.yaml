@@ -1,0 +1,10 @@
+packages:
+  - '.'
+  - '../demo1-video-parse'
+  - '../demo2-image-understand'
+  - '../demo3-video-summary'
+  - '../demo4-creative-gen'
+  - '../demo5-video-qa'
+allowBuilds:
+  esbuild: true
+  yt-dlp-exec: true
