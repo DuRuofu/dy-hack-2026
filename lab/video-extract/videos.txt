@@ -1,0 +1,5 @@
+# 测试视频链接
+# 每行一个抖音视频链接，启动后可以在 UI 中直接粘贴使用
+# 示例:
+# https://www.douyin.com/video/xxx
+# https://v.douyin.com/xxx
